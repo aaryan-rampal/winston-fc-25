@@ -95,7 +95,7 @@ SPACE_CALCULATOR_TOOLS = {
                 "properties": {
                     "spacecraft_mass": {
                         "type": "number",
-                        "description": "The mass of the spacecraft in kilograms which determines the gravitational force it exerts",
+                        "description": "The mass of the spacecraft in kilograms",
                     },
                     "object_mass": {
                         "type": "number",
@@ -163,7 +163,8 @@ def calculate_distance(
             object_coordinates["z"],
         )
 
-        # TODO #5: Calculate Euclidean distance in kilometers using the distance formula; Hint: Use math.sqrt and the 3D distance formula: sqrt((x2-x1)² + (y2-y1)² + (z2-z1)²)
+        # TODO #5: Calculate Euclidean distance in kilometers using the distance formula;
+        # Hint: Use math.sqrt and the 3D distance formula: sqrt((x2-x1)² + (y2-y1)² + (z2-z1)²)
         distance_km = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
 
         # Convert to requested unit
@@ -184,9 +185,9 @@ def calculate_distance(
             "unit": unit,
             # TODO #7: Update vector field with direction components (x, y, z differences)
             "vector": {
-                "x": round(x2 - x1, 4),
-                "y": round(y2 - y1, 4),
-                "z": round(z2 - z1, 4),
+                "x": x2 - x1,
+                "y": y2 - y1,
+                "z": z2 - z1,
             },
         }
 
@@ -214,6 +215,7 @@ def calculate_gravity(
 
         result = {
             "force_newtons": round(force, 4),
+            # TODO #11
             "spacecraft_mass_kg": spacecraft_mass,
             "object_mass_kg": object_mass,
             "distance_m": distance,
