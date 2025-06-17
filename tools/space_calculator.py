@@ -206,15 +206,15 @@ def calculate_gravity(
     """Calculate the gravitational force between the spacecraft and a celestial object."""
     try:
         # TODO #9: Set the gravitational constant (G) in m³/kg/s² - you can search online for this value
-        G = 0  # Replace this with the actual gravitational constant
+        G = 6.67430e-11  # Gravitational constant in m³/(kg·s²)
 
         # TODO #10: Calculate gravitational force using Newton's law: F = G * m1 * m2 / r²
         # Reference the input parameters of the function
-        force = 0  # Replace this with the actual gravitational force calculation
+        force = G * spacecraft_mass * object_mass / (distance**2)
 
         result = {
             "force_newtons": round(force, 4),
-            # TODO #11: Add spacecraft_mass_kg field to show input spacecraft mass
+            "spacecraft_mass_kg": spacecraft_mass,
             "object_mass_kg": object_mass,
             "distance_m": distance,
         }
