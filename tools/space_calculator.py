@@ -164,14 +164,14 @@ def calculate_distance(
         )
 
         # TODO #5: Calculate Euclidean distance in kilometers using the distance formula; Hint: Use math.sqrt and the 3D distance formula: sqrt((x2-x1)² + (y2-y1)² + (z2-z1)²)
-        distance_km = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+        distance_km = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
 
         # Convert to requested unit
         if unit == "km":
             distance_value = distance_km
         elif unit == "au":  # Astronomical Unit
             # TODO #6: Convert km to AU (1 AU = 149,597,870.7 km)
-            distance_value = distance_km  # Replace this with proper conversion
+            distance_value = distance_km / 149597870.7  # 1 AU = 149,597,870.7 km
         elif unit == "ly":  # Light Year
             distance_value = (
                 distance_km / 9460730472580.8
