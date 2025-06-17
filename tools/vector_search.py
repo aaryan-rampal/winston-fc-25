@@ -159,7 +159,7 @@ def _get_embedding(text: str) -> np.ndarray:
         embedding_vector = None
         if "embeddingsByType" in response_body:
             if "float" in response_body["embeddingsByType"]:
-                embedding_vector = response_body["embeddingsByType"]["float"][0]
+                embedding_vector = response_body["embeddingsByType"]["float"]
             else:
                 embedding_vector = response_body["embeddingsByType"].get(
                     "embedding", None
@@ -343,9 +343,7 @@ def encyclopedia_search(
 
         # TODO #11: Sort results by similarity score in descending order
         # Hint: Use sort() with key=lambda and reverse=True
-        results_with_scores.sort(
-            key=lambda x: x["similarity_score"], reverse=True
-        )
+        results_with_scores.sort(key=lambda x: x["similarity_score"], reverse=True)
 
         top_results = results_with_scores[:top_k]
 

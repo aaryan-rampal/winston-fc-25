@@ -19,9 +19,9 @@ class Winston(Model):
     finetuned_model: Optional[FinetunedModel] = None
     use_finetuned: bool = False
     model_id: str = "gpt-4o"
-    
+
     def __init__(
-        self, 
+        self,
         model_id: str = "gpt-4o",
         auto_execute: bool = True,
         vincent: Vincent = None,
@@ -33,11 +33,11 @@ class Winston(Model):
         self.model_id = model_id
         self._auto_execute = auto_execute
         self.bedrock_client = boto3.client('bedrock-runtime', region_name=region_name)
-        
+
         patch_client(self.bedrock_client)
-        
+
         initialize_or_load_vector_db('/Users/wylerzahm/Desktop/projects/fc2025-space-agent/objects/datasets/knowledge_base.md')
-        
+
         if use_finetuned:
             self.finetuned_model = FinetunedModel()
 
@@ -53,8 +53,8 @@ class Winston(Model):
     ##### 2. QUERY PROCESSING ENTRY POINT #####
     @weave.op(name="winston-process")
     def process(
-        self, 
-        query: str, 
+        self,
+        query: str,
         callback: Callable[[Dict[str, Any]], None] = None
     ) -> Dict[str, Any]:
         """
@@ -66,30 +66,31 @@ class Winston(Model):
         # Get initial response
         response = self._plan_or_answer(query)
         #print("***** Initial response:", response)
-        
+
         # If we got a plan and should execute it
         if response.get('type') == 'plan':
-            # Execute the plan and get the updated response with process info
-            executed_plan_response = self._execute_plan(response)
-            #print("***** Executed plan response:", executed_plan_response)
+            for iters in range(3):
+                # Execute the plan and get the updated response with process info
+                executed_plan_response = self._execute_plan(response)
+                #print("***** Executed plan response:", executed_plan_response)
 
-            # If execution occurred (indicated by presence of process key from _execute_plan)
-            if executed_plan_response and 'process' in executed_plan_response:
-                # Get the final answer from the LLM using the updated messages
-                if self.finetuned_model:
-                    final_response = self._solve_with_results_finetuned(query, executed_plan_response['process']['execution_summary'])
-                else:
-                    final_response = self._solve_with_results(query, executed_plan_response['process']['execution_summary'])
-                #print("***** Final response after execution:", final_response)
-                
-                # Carry over the detailed process information from the execution
-                final_response['process'] = executed_plan_response['process']
-                
+                # If execution occurred (indicated by presence of process key from _execute_plan)
+                if executed_plan_response and 'process' in executed_plan_response:
+                    # Get the final answer from the LLM using the updated messages
+                    if self.finetuned_model:
+                        final_response = self._solve_with_results_finetuned(query, executed_plan_response['process']['execution_summary'])
+                    else:
+                        final_response = self._solve_with_results(query, executed_plan_response['process']['execution_summary'])
+                    #print("***** Final response after execution:", final_response)
+
+                    # Carry over the detailed process information from the execution
+                    final_response['process'] = executed_plan_response['process']
+
                 return final_response
             else:
                  # If execution failed very early, return the initial response which might have some error info
                  return executed_plan_response or response
-        
+
         else:
             # If it wasn't a plan or auto_execute is off, return the initial response
             return response
@@ -97,8 +98,8 @@ class Winston(Model):
     ##### 3. PLAN OR ANSWER #####
     @weave.op(name="winston-solve")
     def _plan_or_answer(
-        self, 
-        query: str, 
+        self,
+        query: str,
         execution_results: Vincent.VincentExecuteResult = None
     ) -> Dict[str, Any]:
 
@@ -106,9 +107,9 @@ class Winston(Model):
         tool_descriptions = self.vincent.tools_prompt.get_tools_descriptions()
 
         # Generate the dynamic system message, ensure system message is always first
-        system_message = self.prompt_plan_answer.system_prompt(tool_descriptions)   
+        system_message = self.prompt_plan_answer.system_prompt(tool_descriptions)
         messages_for_run = [
-            {"role": "system", "content": system_message}, 
+            {"role": "system", "content": system_message},
             {"role": "user", "content": query}
         ]
 
@@ -125,10 +126,10 @@ class Winston(Model):
         """Execute a plan, update its process key, and return it."""
         # Get the original plan steps
         original_steps = plan_response.get('content', {}).get('steps', [])
-        
+
         # Execute the plan using Vincent
         execution_result: Vincent.VincentExecuteResult = self.vincent.execute(plan_response['content'])
-        
+
         # Prepare detailed process information
         tools_used = []
         steps_taken = []
@@ -146,11 +147,11 @@ class Winston(Model):
                 step_def = original_steps[i]
                 tool_name = step_def.get('tool')
                 status = 'completed' if execution_result.completed else ('failed' if i + 1 == execution_result.failure_step else 'completed')
-                step_summary = f"Step {i + 1} ({tool_name}): {output}" 
+                step_summary = f"Step {i + 1} ({tool_name}): {output}"
                 if status == 'failed':
                     step_summary += " (Failed)"
                 execution_summary.append(step_summary)
-                
+
                 if tool_name:
                     tools_used.append(tool_name)
                     steps_taken.append({
@@ -171,7 +172,7 @@ class Winston(Model):
                     execution_summary.append(step_summary)
                     if tool_name:
                         # We might still want to list the tool even if not used
-                        # tools_used.append(tool_name) 
+                        # tools_used.append(tool_name)
                         steps_taken.append({
                             'step': i + 1,
                             'tool': tool_name,
@@ -180,7 +181,7 @@ class Winston(Model):
                             'status': 'not_executed',
                             'reason': step_def.get('reason', '')
                         })
-            
+
             # Update the process key in the original plan_response
             plan_response['process'] = {
                 'tools_used': list(set(tools_used)), # Unique tools used
@@ -196,13 +197,13 @@ class Winston(Model):
                 'steps_taken': [],
                 'execution_summary': ["Plan execution failed or did not occur."]
             }
-            
+
         return plan_response # Return the plan_response with populated process info
 
     ##### 5. SOLVE WITH RESULTS #####
     @weave.op(name="winston-solve-with-results")
     def _solve_with_results(
-        self, 
+        self,
         query: str,
         execution_results: List[str],
     ) -> Dict[str, Any]:
@@ -211,14 +212,14 @@ class Winston(Model):
         system_message = self.prompt_answer_with_results.system_prompt(str(execution_results))
         # Generate the messages for the LLM run
         messages_for_run = [
-            {"role": "system", "content": system_message}, 
+            {"role": "system", "content": system_message},
             {"role": "user", "content": query}
         ]
 
         # Generate response
         response = self._generate_response(messages_for_run)
         return response
-    
+
 
 
 
@@ -228,7 +229,7 @@ class Winston(Model):
     # Evaluation results not guaranteed if this is modified.
     @weave.op(name="winston-solve-finetuned")
     def _solve_with_results_finetuned(
-        self, 
+        self,
         query: str,
         execution_results: List[str],
     ) -> Dict[str, Any]:
@@ -262,7 +263,7 @@ class Winston(Model):
             # Convert messages to Claude format
             claude_messages = []
             system_message = None
-            
+
             for msg in processed_messages:
                 if msg['role'] == 'system':
                     system_message = msg['content']
@@ -279,7 +280,7 @@ class Winston(Model):
                 "temperature": 0.7,
                 "messages": claude_messages
             }
-            
+
             if system_message:
                 request_body["system"] = system_message
 
@@ -297,10 +298,10 @@ class Winston(Model):
             body_unparsed = response['body'].read()
             response_body = json.loads(body_unparsed)
             content = response_body['content'][0]['text']
-            
+
             # Clean the content by removing markdown code block markers and extracting JSON
             cleaned_content = clean_claude_json(content)
-            
+
             # Parse the JSON response from the model
             result = json.loads(cleaned_content)['result']
 
@@ -322,9 +323,9 @@ class Winston(Model):
                     'steps_taken': [],
                     'execution_summary': []
                 }
-            
+
             return result
-                
+
         except Exception as e:
             # Return a properly structured error response, including a process key
             return {
