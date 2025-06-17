@@ -40,6 +40,11 @@ SPACE_CALCULATOR_TOOLS = {
             Use this tool for:
             - Determining how far the spacecraft is from a planet, moon, star, or other celestial body
             - TODO #1: Add more use cases for distance calculations (e.g., "Calculating minimum safe distance from a black hole's event horizon")
+            - Calculating the distance between two celestial bodies
+            - Calculating the distance between the spacecraft and the center of the galaxy
+            - Calculating the distance between the spacecraft and the center of the universe
+            - Calculating the distance between the spacecraft and the center of the observable universe
+            - Calculating the distance between the spacecraft and the center of the multiverse
             - Planning navigation routes and course corrections
             - Estimating travel time to destinations
             """,
@@ -59,6 +64,7 @@ SPACE_CALCULATOR_TOOLS = {
                     "object_coordinates": {
                         "type": "object",
                         "description": "TODO #2: Add description for object coordinates parameter - describe what these coordinates represent in the context of space navigation",
+                        "description": "The current coordinates of the spacecraft in 3D space (x,y,z)",
                         "properties": {
                             "x": {"type": "number"},
                             "y": {"type": "number"},
@@ -85,6 +91,7 @@ SPACE_CALCULATOR_TOOLS = {
             Use this tool for:
             - Determining gravitational influence of nearby celestial bodies
             - TODO #3: Add use case for escape velocity calculations
+            - Calculating the escape velocity of a celestial object
             - Assessing gravity-related dangers
             - Planning orbital maneuvers
             """,
@@ -93,7 +100,9 @@ SPACE_CALCULATOR_TOOLS = {
                 "properties": {
                     "spacecraft_mass": {
                         "type": "number",
-                        "description": "TODO #4: Add description for spacecraft mass parameter - describe what this mass value represents and its role in gravitational calculations"
+                        "description": "TODO #4: Add description for spacecraft mass parameter - describe what this mass value represents and its role in gravitational calculations",
+                        "description": "The mass of the spacecraft in kilograms",
+                        "description": "The mass of the spacecraft in pounds that it exerts on the celestial object"
                     },
                     "object_mass": {
                         "type": "number",
