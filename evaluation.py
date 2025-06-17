@@ -95,8 +95,8 @@ async def main():
     dataset = Dataset(name=dataset_name, rows=filtered_examples)
 
     # instantiate winston with all tools
-    # model_id = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
-    model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+    model_id = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+    # model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
     winston = Winston(
         model_id=model_id,
         use_finetuned=args.use_finetuned
