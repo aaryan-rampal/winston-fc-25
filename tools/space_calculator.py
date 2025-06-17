@@ -164,7 +164,7 @@ def calculate_distance(
         )
 
         # TODO #5: Calculate Euclidean distance in kilometers using the distance formula; Hint: Use math.sqrt and the 3D distance formula: sqrt((x2-x1)² + (y2-y1)² + (z2-z1)²)
-        distance_km = 0  # Replace this line with the actual calculation
+        distance_km = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 
         # Convert to requested unit
         if unit == "km":
