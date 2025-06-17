@@ -320,20 +320,20 @@ def encyclopedia_search(
 
     try:
         # TODO #8: Get embedding for the search query
-        query_embedding = None  # Replace with actual embedding generation
+        query_embedding = _get_embedding(message)
 
         results_with_scores = []
         for entry in _VECTOR_DATABASE_STORE:
             stored_embedding = entry.get("embedding")
             if isinstance(stored_embedding, np.ndarray):
                 # TODO #9: Calculate similarity between query and stored embeddings
-                similarity = 0.0  # Replace with similarity calculation
+                similarity = _cosine_similarity(query_embedding, stored_embedding)
 
                 # TODO #10: Create result entry with text, chunk_id, and similarity score
                 result_entry = {
                     "text": entry["text"],
-                    # TODO: Add chunk_id field
-                    # TODO: Add score field
+                    "chunk_id": entry["chunk_id"],
+                    "similarity_score": similarity,
                 }
                 results_with_scores.append(result_entry)
             else:
@@ -343,6 +343,9 @@ def encyclopedia_search(
 
         # TODO #11: Sort results by similarity score in descending order
         # Hint: Use sort() with key=lambda and reverse=True
+        results_with_scores.sort(
+            key=lambda x: x["similarity_score"], reverse=True
+        )
 
         top_results = results_with_scores[:top_k]
 
@@ -352,9 +355,7 @@ def encyclopedia_search(
             )
 
         # TODO #12: Return results using ToolResult.ok() instead of throwing error
-        raise Exception(
-            "Vector search not properly implemented - check return statement"
-        )
+        return ToolResult.ok(top_results)
 
     except Exception as e:
         return ToolResult.err(f"An error occurred during vector search: {str(e)}")
