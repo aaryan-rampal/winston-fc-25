@@ -75,39 +75,40 @@ async def main():
     # Initialize the vector database
     # Parse arguments
     args = parse_args()
-    
+
     # Extract dataset identifier from filename (e.g., "public" from "eval_public.jsonl")
     filename = os.path.basename(args.dataset)
     if filename.startswith('eval_') and filename.endswith('.jsonl'):
         dataset_identifier = filename[5:-6]  # Remove 'eval_' prefix and '.jsonl' suffix
     else:
         dataset_identifier = "unknown"
-    
+
     # Load the dataset
     dataset_name = f"WinstonSpaceAgentDataset{dataset_identifier.capitalize()}"
     if args.first_n:
         dataset_name += f"-first{args.first_n}"
     elif args.ids:
         dataset_name += f"-ids{'_'.join(args.ids)}"
-    
+
     examples = load_dataset(args.dataset)
     filtered_examples = filter_dataset(examples, args.first_n, args.ids)
     dataset = Dataset(name=dataset_name, rows=filtered_examples)
 
     # instantiate winston with all tools
-    model_id = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+    # model_id = "us.anthropic.claude-3-7-sonnet-20250219-v1:0"
+    model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
     winston = Winston(
         model_id=model_id,
         use_finetuned=args.use_finetuned
     )
 
     # Initialize the scorers
-    
+
     #######################################################
     # DO NOT MODIFY THIS LINE (Feel free to add more scorers)
     quality_scorer = ResponseQualityScorer(model_id=model_id, column_map={"input": "input", "target": "target"})
     #######################################################
-    
+
     # Extract model ID without version for display name
     model_id_for_display = model_id.split('-v')[0] if '-v' in model_id else model_id
 
@@ -119,7 +120,7 @@ async def main():
         scorers=[
             #######################################################
             # DO NOT MODIFY THIS LINE (Feel free to add more scorers)
-            quality_scorer 
+            quality_scorer
             #######################################################
         ],
         trials=args.trials,
@@ -136,4 +137,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-    
+
