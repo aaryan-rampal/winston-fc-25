@@ -183,11 +183,15 @@ def calculate_distance(
             "distance": round(distance_value, 4),
             "unit": unit,
             # TODO #7: Update vector field with direction components (x, y, z differences)
-            "vector": {"x": 0, "y": 0, "z": 0},
+            "vector": {
+                "x": round(x2 - x1, 4),
+                "y": round(y2 - y1, 4),
+                "z": round(z2 - z1, 4),
+            },
         }
 
         # TODO #8: Return result using ToolResult.ok() wrapper instead of throwing error
-        raise Exception("Function not properly implemented - check return statement")
+        return ToolResult.ok(result)
     except Exception as e:
         return ToolResult.err(str(e))
 
